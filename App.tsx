@@ -1,0 +1,156 @@
+import React, { useState } from 'react';
+import Login from './pages/Login';
+import Queue from './pages/Queue';
+
+export default function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [activeTab, setActiveTab] = useState<'queue' | 'mothers' | 'groups' | 'create-group' | 'notifications'>('queue');
+  const [notifications, setNotifications] = useState([
+    { id: '1', message: 'Amina Njang finished conversation onboarding and was added to queue.', time: '5m ago', read: false },
+    { id: '2', message: 'Grace Mboum finished conversation onboarding and was added to queue.', time: '1h ago', read: false },
+  ]);
+
+  if (!isAuthenticated) {
+    return <Login onLoginSuccess={() => setIsAuthenticated(true)} />;
+  }
+
+  const unreadCount = notifications.filter((n) => !n.read).length;
+
+  return (
+    <div className="min-h-screen bg-slate-50 flex flex-col">
+      {/* Top Bar */}
+      <header className="bg-slate-900 text-white border-b border-slate-800 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-teal-500 text-slate-950 font-black flex items-center justify-center text-sm">
+              TM
+            </div>
+            <span className="font-bold tracking-wide text-base text-white">Tele-Mama Admin</span>
+          </div>
+
+          <nav className="flex items-center gap-1 text-sm font-medium">
+            <button
+              onClick={() => setActiveTab('queue')}
+              className={`px-3 py-1.5 rounded-lg cursor-pointer transition-colors ${activeTab === 'queue' ? 'bg-teal-600/30 text-teal-300 border border-teal-500/30' : 'text-slate-400 hover:text-white'}`}
+            >
+              Queue
+            </button>
+            <button
+              onClick={() => setActiveTab('mothers')}
+              className={`px-3 py-1.5 rounded-lg cursor-pointer transition-colors ${activeTab === 'mothers' ? 'bg-teal-600/30 text-teal-300 border border-teal-500/30' : 'text-slate-400 hover:text-white'}`}
+            >
+              Mothers List
+            </button>
+            <button
+              onClick={() => setActiveTab('groups')}
+              className={`px-3 py-1.5 rounded-lg cursor-pointer transition-colors ${activeTab === 'groups' ? 'bg-teal-600/30 text-teal-300 border border-teal-500/30' : 'text-slate-400 hover:text-white'}`}
+            >
+              Groups
+            </button>
+            <button
+              onClick={() => setActiveTab('notifications')}
+              className={`px-3 py-1.5 rounded-lg cursor-pointer transition-colors relative ${activeTab === 'notifications' ? 'bg-teal-600/30 text-teal-300 border border-teal-500/30' : 'text-slate-400 hover:text-white'}`}
+            >
+              Notifications
+              {unreadCount > 0 && (
+                <span className="ml-1.5 bg-amber-500 text-slate-950 text-xs font-bold px-1.5 py-0.2 rounded-full">
+                  {unreadCount}
+                </span>
+              )}
+            </button>
+          </nav>
+
+          <button
+            onClick={() => setIsAuthenticated(false)}
+            className="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-md cursor-pointer"
+          >
+            Sign Out
+          </button>
+        </div>
+      </header>
+
+      {/* Main Tab Content */}
+      <main className="flex-1 max-w-7xl w-full mx-auto p-6">
+        {activeTab === 'queue' && <Queue />}
+
+        {activeTab === 'mothers' && (
+          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 space-y-4">
+            <h1 className="text-xl font-bold text-slate-800">All Mothers Directory</h1>
+            <p className="text-sm text-slate-500">Filterable list of registered mothers in the system.</p>
+            <div className="text-sm text-slate-600 border-t border-slate-100 pt-4">
+              [Mock Table - Reads from <code className="text-teal-600 font-mono">users</code> table][cite: 1]
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'groups' && (
+          <div className="space-y-6">
+            <div className="flex justify-between items-center">
+              <div>
+                <h1 className="text-xl font-bold text-slate-800">Peer Support Groups</h1>
+                <p className="text-sm text-slate-500">List of active WhatsApp support groups[cite: 1].</p>
+              </div>
+              <button
+                onClick={() => setActiveTab('create-group')}
+                className="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg text-sm font-semibold cursor-pointer"
+              >
+                + Create Group
+              </button>
+            </div>
+
+            <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-2">
+              <h3 className="font-bold text-slate-800">PPD Support - English - Cohort A</h3>
+              <p className="text-xs text-slate-500">Language: English | Topic: Postpartum Depression[cite: 1]</p>
+              <p className="text-xs text-teal-600 font-mono">Reads from: groups table[cite: 1]</p>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'create-group' && (
+          <div className="max-w-xl mx-auto bg-white border border-slate-200 rounded-xl p-6 shadow-sm space-y-4">
+            <h1 className="text-xl font-bold text-slate-800">Create Support Group</h1>
+            <p className="text-sm text-slate-500">Inserts a new group record into the <code className="text-teal-600 font-mono">groups</code> database[cite: 1].</p>
+            <form onSubmit={(e) => { e.preventDefault(); setActiveTab('groups'); }} className="space-y-3">
+              <div>
+                <label className="block text-xs font-semibold uppercase text-slate-600 mb-1">Group Name</label>
+                <input type="text" required placeholder="e.g. Anxiety Group - French" className="w-full border border-slate-300 rounded-lg p-2 text-sm" />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold uppercase text-slate-600 mb-1">WhatsApp Group Link</label>
+                <input type="url" required placeholder="https://chat.whatsapp.com/..." className="w-full border border-slate-300 rounded-lg p-2 text-sm" />
+              </div>
+              <button type="submit" className="bg-teal-600 text-white font-semibold px-4 py-2 rounded-lg text-sm cursor-pointer">
+                Save & Create
+              </button>
+            </form>
+          </div>
+        )}
+
+        {activeTab === 'notifications' && (
+          <div className="max-w-3xl mx-auto space-y-4">
+            <div className="flex justify-between items-center">
+              <div>
+                <h1 className="text-xl font-bold text-slate-800">Admin Notification Feed</h1>
+                <p className="text-sm text-slate-500">Reads from <code className="text-teal-600 font-mono">admin_notifications</code>[cite: 1].</p>
+              </div>
+              <button
+                onClick={() => setNotifications(notifications.map((n) => ({ ...n, read: true })))}
+                className="text-xs bg-slate-200 text-slate-700 px-3 py-1.5 rounded-md cursor-pointer"
+              >
+                Mark as read[cite: 1]
+              </button>
+            </div>
+            <div className="bg-white rounded-xl border border-slate-200 divide-y divide-slate-100 overflow-hidden shadow-sm">
+              {notifications.map((n) => (
+                <div key={n.id} className={`p-4 flex justify-between items-center ${!n.read ? 'bg-amber-50/50' : ''}`}>
+                  <p className="text-sm text-slate-800">{n.message}</p>
+                  <span className="text-xs text-slate-400">{n.time}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </main>
+    </div>
+  );
+}
